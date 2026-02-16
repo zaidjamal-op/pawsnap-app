@@ -1,4 +1,5 @@
 import { BrandColors } from '@/constants/theme';
+import ScreenHeader from '@/components/ScreenHeader';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
@@ -11,6 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { AppConfig } from '@/constants/config';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 // Mock user data
@@ -46,12 +48,19 @@ export default function ProfileScreen() {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Profile</Text>
-        <TouchableOpacity style={styles.headerBtn} activeOpacity={0.7}>
-          <MaterialIcons name="settings" size={22} color="#9CA3AF" />
-        </TouchableOpacity>
-      </View>
+      {/* Header */}
+      <ScreenHeader
+        title="Profile"
+        rightElement={
+          <TouchableOpacity
+            style={styles.headerBtn}
+            activeOpacity={0.7}
+            onPress={() => {}} // Placeholder for settings action if needed, or remove if not functional
+          >
+            <MaterialIcons name="settings" size={22} color="#9CA3AF" />
+          </TouchableOpacity>
+        }
+      />
 
       <ScrollView
         style={styles.scroll}
@@ -140,11 +149,13 @@ export default function ProfileScreen() {
 
         {/* ─── Log Out ─── */}
         <Animated.View entering={FadeInDown.delay(420).duration(400)}>
+
+
           <TouchableOpacity style={styles.logoutCard} activeOpacity={0.7}>
             <MaterialIcons name="logout" size={20} color="#EF4444" />
             <Text style={styles.logoutText}>Log Out</Text>
           </TouchableOpacity>
-          <Text style={styles.version}>App Version 2.4.1 (Build 890)</Text>
+          <Text style={styles.version}>App Version {AppConfig.version} (Build {AppConfig.build})</Text>
         </Animated.View>
 
         <View style={{ height: 40 }} />
@@ -157,17 +168,12 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: BrandColors.background },
 
   /* Header */
-  header: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingTop: Platform.OS === 'ios' ? 60 : 40,
-    paddingHorizontal: 24, paddingBottom: 12,
-  },
-  headerTitle: { fontSize: 28, fontWeight: '800', color: '#FFFFFF' },
   headerBtn: {
     width: 40, height: 40, borderRadius: 20,
     justifyContent: 'center', alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.04)',
   },
+
 
   /* Scroll */
   scroll: { flex: 1 },

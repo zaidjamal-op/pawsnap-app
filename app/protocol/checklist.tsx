@@ -1,4 +1,5 @@
 import { BrandColors } from '@/constants/theme';
+import ScreenHeader from '@/components/ScreenHeader';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
@@ -75,22 +76,23 @@ export default function ChecklistScreen() {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.headerBtn}
-          onPress={() => router.back()}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="arrow-back" size={22} color="#D1D5DB" />
-        </TouchableOpacity>
-        <View style={styles.headerCenter}>
-          <Text style={styles.headerTitle}>Day {CURRENT_DAY} of {PROTOCOL_DAYS}</Text>
-          <Text style={styles.headerProtocol}>{PROTOCOL_NAME}</Text>
-        </View>
-        <TouchableOpacity style={styles.headerBtn} activeOpacity={0.7}>
-          <MaterialIcons name="more-horiz" size={22} color="#9CA3AF" />
-        </TouchableOpacity>
-      </View>
+      <ScreenHeader
+        title={
+          <View style={{ alignItems: 'center' }}>
+            <Text style={{ fontSize: 18, fontWeight: '700', color: '#FFFFFF' }}>
+              Day {CURRENT_DAY} of {PROTOCOL_DAYS}
+            </Text>
+            <Text style={{ fontSize: 12, fontWeight: '600', color: BrandColors.primary, marginTop: 2 }}>
+              {PROTOCOL_NAME}
+            </Text>
+          </View>
+        }
+        rightElement={
+          <TouchableOpacity activeOpacity={0.7} style={{ width: 40, height: 40, justifyContent: 'center', alignItems: 'center' }}>
+            <MaterialIcons name="more-horiz" size={22} color="#9CA3AF" />
+          </TouchableOpacity>
+        }
+      />
 
       <ScrollView
         style={styles.scroll}

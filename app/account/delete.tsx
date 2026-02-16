@@ -1,4 +1,5 @@
 import { BrandColors } from '@/constants/theme';
+import ScreenHeader from '@/components/ScreenHeader';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
@@ -32,17 +33,7 @@ export default function DeleteAccountScreen() {
       <View style={styles.glowRed} />
 
       {/* ── Header ── */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backBtn}
-          onPress={() => router.back()}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="arrow-back" size={20} color={BrandColors.primary} />
-        </TouchableOpacity>
-        <Text style={styles.headerLabel}>ACCOUNT SETTINGS</Text>
-        <View style={{ width: 40 }} />
-      </View>
+      <ScreenHeader title="ACCOUNT SETTINGS" style={{ backgroundColor: 'transparent', borderBottomWidth: 0 }} />
 
       <ScrollView
         style={{ flex: 1 }}

@@ -1,4 +1,5 @@
 import { BrandColors } from '@/constants/theme';
+import ScreenHeader from '@/components/ScreenHeader';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -48,28 +49,29 @@ export default function PremiumInsightsScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
-        <Animated.View entering={FadeIn.duration(400)} style={styles.header}>
-          <View style={styles.headerLeftContainer}>
-            <TouchableOpacity onPress={() => router.back()} style={styles.backBtnWrapper} activeOpacity={0.7}>
-              <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
-            </TouchableOpacity>
-            <View>
-              <Text style={styles.headerTitle}>Weekly Summary</Text>
-              <View style={styles.dateRow}>
+        <ScreenHeader
+          style={{ marginBottom: 24, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: 'rgba(55,65,81,0.4)', paddingTop: 0 }}
+          showBorder={false}
+          title={
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ fontSize: 18, fontWeight: '700', color: '#FFFFFF' }}>Weekly Summary</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 3 }}>
                 <Ionicons name="calendar-outline" size={14} color={BrandColors.primary} />
-                <Text style={styles.headerDate}>Oct 10 – Oct 17</Text>
+                <Text style={{ fontSize: 13, fontWeight: '500', color: 'rgba(148,163,184,0.7)' }}>Oct 10 – Oct 17</Text>
                 <Ionicons name="chevron-down" size={14} color="rgba(148,163,184,0.6)" />
               </View>
             </View>
-          </View>
-          <View style={styles.avatarCircle}>
-            <Image
-              source={require('@/assets/images/pawsnap-logo.png')}
-              style={styles.avatarImage}
-              resizeMode="cover"
-            />
-          </View>
-        </Animated.View>
+          }
+          rightElement={
+            <View style={styles.avatarCircle}>
+              <Image
+                source={require('@/assets/images/pawsnap-logo.png')}
+                style={styles.avatarImage}
+                resizeMode="cover"
+              />
+            </View>
+          }
+        />
 
         {/* ─── Stats Row ─── */}
         <Animated.View entering={FadeInDown.delay(100).duration(450)} style={styles.statsRow}>

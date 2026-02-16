@@ -1,4 +1,5 @@
 import { BrandColors } from '@/constants/theme';
+import { Image as ExpoImage } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
@@ -45,7 +46,12 @@ export default function NotificationsScreen({ onEnable, onSkip }: NotificationsS
             <View style={styles.notifContent}>
               {/* Icon */}
               <View style={styles.notifIconCircle}>
-                <Ionicons name="paw" size={22} color={BrandColors.primary} />
+                <ExpoImage
+                  source={require('@/assets/images/pawsnap-logo.svg')}
+                  style={{ width: 50, height: 50 }}
+                  contentFit="contain"
+                  tintColor={BrandColors.primary}
+                />
               </View>
               {/* Skeleton lines */}
               <View style={styles.notifLines}>

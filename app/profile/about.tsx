@@ -1,4 +1,5 @@
 import { BrandColors } from '@/constants/theme';
+import ScreenHeader from '@/components/ScreenHeader';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
@@ -11,31 +12,18 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { AppConfig } from '@/constants/config';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import Svg, { Path } from 'react-native-svg';
+import { Image as ExpoImage } from 'expo-image';
 
 function PawLogo() {
   return (
-    <Svg width={64} height={64} viewBox="0 0 24 24" fill="none">
-      <Path
-        d="M12 2C13.6569 2 15 3.34315 15 5C15 6.65685 13.6569 8 12 8C10.3431 8 9 6.65685 9 5C9 3.34315 10.3431 2 12 2Z"
-        fill={BrandColors.primary}
-      />
-      <Path
-        d="M18.5 4C19.8807 4 21 5.11929 21 6.5C21 7.88071 19.8807 9 18.5 9C17.1193 9 16 7.88071 16 6.5C16 5.11929 17.1193 4 18.5 4Z"
-        fill={BrandColors.primary}
-        fillOpacity={0.7}
-      />
-      <Path
-        d="M5.5 4C6.88071 4 8 5.11929 8 6.5C8 7.88071 6.88071 9 5.5 9C4.11929 9 3 7.88071 3 6.5C3 5.11929 4.11929 4 5.5 4Z"
-        fill={BrandColors.primary}
-        fillOpacity={0.7}
-      />
-      <Path
-        d="M18.8954 11.5582C19.7891 12.3168 20.1039 13.6393 19.3326 14.8878C18.6667 15.9658 17.5165 17.653 16.0366 19.4674C14.9392 20.8127 13.5186 21.9961 12.0003 21.9961C10.482 21.9961 9.06141 20.8127 7.96403 19.4674C6.48412 17.653 5.33393 15.9658 4.668 14.8878C3.89672 13.6393 4.21151 12.3168 5.10519 11.5582C6.91899 10.0185 9.47563 11.0003 12.0003 11.0003C14.525 11.0003 17.0816 10.0185 18.8954 11.5582Z"
-        fill={BrandColors.primary}
-      />
-    </Svg>
+    <ExpoImage
+      source={require('@/assets/images/pawsnap-logo.svg')}
+      style={{ width: 100, height: 100 }}
+      contentFit="contain"
+      tintColor={BrandColors.primary}
+    />
   );
 }
 
@@ -70,13 +58,7 @@ export default function AboutScreen() {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.headerBtn} onPress={() => router.back()} activeOpacity={0.7}>
-          <Ionicons name="chevron-back" size={24} color="#D1D5DB" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>About Pawsnap</Text>
-        <View style={{ width: 40 }} />
-      </View>
+      <ScreenHeader title="About Pawsnap" />
 
       <ScrollView
         style={styles.scroll}
@@ -89,9 +71,10 @@ export default function AboutScreen() {
             <PawLogo />
           </View>
           <Text style={styles.brandName}>Pawsnap</Text>
+
           <View style={styles.versionPill}>
             <View style={styles.versionDot} />
-            <Text style={styles.versionText}>Version 1.0.4  |  Build 42</Text>
+            <Text style={styles.versionText}>Version {AppConfig.version}  |  Build {AppConfig.build}</Text>
           </View>
         </Animated.View>
 
@@ -164,6 +147,9 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     shadowColor: '#000', shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.4, shadowRadius: 20, elevation: 10,
+    width: 120,
+    height: 120,
+    justifyContent: 'center', alignItems: 'center',
   },
   brandName: { fontSize: 28, fontWeight: '800', color: '#FFFFFF', marginBottom: 8 },
   versionPill: {

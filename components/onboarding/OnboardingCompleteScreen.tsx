@@ -1,5 +1,6 @@
 import { BrandColors } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+import { Image as ExpoImage } from 'expo-image';
 import React from 'react';
 import {
     Platform,
@@ -41,7 +42,12 @@ export default function OnboardingCompleteScreen({
           {/* Icon container */}
           <View style={styles.iconOuter}>
             <View style={styles.iconInner}>
-              <Ionicons name="checkmark" size={52} color={BrandColors.background} />
+              <ExpoImage
+                                source={require('@/assets/images/pawsnap-logo.svg')}
+                                style={{ width: 50, height: 50 }}
+                                contentFit="contain"
+                                tintColor={BrandColors.background}
+                              />
             </View>
           </View>
           {/* Confetti dots */}
@@ -67,7 +73,11 @@ export default function OnboardingCompleteScreen({
           style={styles.nextCard}
         >
           <View style={styles.nextIconBg}>
-            <Ionicons name="paw" size={22} color={BrandColors.primary} />
+            <ExpoImage
+                                source={require('@/assets/images/pawsnap-logo.svg')}
+                                style={{ width: 50, height: 50 }}
+                                contentFit="contain"
+                              />
           </View>
           <View style={styles.nextTextWrap}>
             <Text style={styles.nextLabel}>UP NEXT</Text>

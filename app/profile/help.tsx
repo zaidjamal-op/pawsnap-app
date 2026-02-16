@@ -1,4 +1,5 @@
 import { BrandColors } from '@/constants/theme';
+import ScreenHeader from '@/components/ScreenHeader';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
@@ -11,6 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { AppConfig } from '@/constants/config';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 interface HelpAction {
@@ -57,13 +59,7 @@ export default function HelpCenterScreen() {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.headerBtn} onPress={() => router.back()} activeOpacity={0.7}>
-          <Ionicons name="chevron-back" size={24} color="#D1D5DB" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Help Center</Text>
-        <View style={{ width: 40 }} />
-      </View>
+      <ScreenHeader title="Help Center" />
 
       <ScrollView
         style={styles.scroll}
@@ -105,9 +101,11 @@ export default function HelpCenterScreen() {
           </Animated.View>
         ))}
 
+
+
         {/* ─── Footer ─── */}
         <Animated.View entering={FadeInDown.delay(500).duration(400)} style={styles.footer}>
-          <Text style={styles.versionText}>Pawsnap Version 2.4.1 (Build 890)</Text>
+          <Text style={styles.versionText}>Pawsnap Version {AppConfig.version} (Build {AppConfig.build})</Text>
           <View style={styles.footerLinks}>
             <TouchableOpacity activeOpacity={0.7}>
               <Text style={styles.footerLink}>Privacy Policy</Text>

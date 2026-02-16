@@ -1,4 +1,5 @@
 import { BrandColors } from '@/constants/theme';
+import ScreenHeader from '@/components/ScreenHeader';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
@@ -31,19 +32,14 @@ export default function ReportSharedScreen() {
   return (
     <View style={styles.container}>
       {/* ── Header ── */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backBtn}
-          onPress={() => router.back()}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="arrow-back" size={22} color="#FFFFFF" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Report Preview</Text>
-        <TouchableOpacity style={styles.moreBtn} activeOpacity={0.7}>
-          <Ionicons name="ellipsis-vertical" size={20} color="rgba(255,255,255,0.4)" />
-        </TouchableOpacity>
-      </View>
+      <ScreenHeader
+        title="Report Preview"
+        rightElement={
+          <TouchableOpacity style={styles.moreBtn} activeOpacity={0.7}>
+            <Ionicons name="ellipsis-vertical" size={20} color="rgba(255,255,255,0.4)" />
+          </TouchableOpacity>
+        }
+      />
 
       {/* ── Scrollable Content ── */}
       <ScrollView

@@ -1,4 +1,5 @@
 import { BrandColors } from '@/constants/theme';
+import ScreenHeader from '@/components/ScreenHeader';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -19,19 +20,14 @@ export default function TriggerDetailsScreen() {
   return (
     <View style={styles.container}>
       {/* ─── Header ─── */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.headerBtn}
-          onPress={() => router.back()}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="chevron-back" size={24} color="#9CA3AF" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Trigger Analysis</Text>
-        <TouchableOpacity style={styles.headerBtn} activeOpacity={0.7}>
-          <Ionicons name="share-outline" size={22} color="#9CA3AF" />
-        </TouchableOpacity>
-      </View>
+      <ScreenHeader
+        title="Trigger Analysis"
+        rightElement={
+          <TouchableOpacity style={styles.headerBtn} activeOpacity={0.7}>
+            <Ionicons name="share-outline" size={22} color="#9CA3AF" />
+          </TouchableOpacity>
+        }
+      />
 
       <ScrollView
         style={styles.scroll}

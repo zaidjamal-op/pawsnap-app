@@ -1,4 +1,5 @@
 import { BrandColors } from '@/constants/theme';
+import ScreenHeader from '@/components/ScreenHeader';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -48,17 +49,7 @@ export default function InsightsRecapScreen() {
   return (
     <View style={styles.container}>
       {/* ─── Header ─── */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.headerBtn}
-          onPress={() => router.back()}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="chevron-back" size={24} color="#9CA3AF" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Insights Recap</Text>
-        <View style={{ width: 40 }} /> 
-      </View>
+      <ScreenHeader title="Insights Recap" />
 
       <ScrollView
         style={styles.scroll}

@@ -1,4 +1,5 @@
 import { BrandColors } from '@/constants/theme';
+import ScreenHeader from '@/components/ScreenHeader';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
@@ -26,17 +27,7 @@ export default function ReportBugScreen() {
   return (
     <View style={styles.container}>
       {/* ── Header ── */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backBtn}
-          onPress={() => router.back()}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="arrow-back" size={22} color="#CBD5E1" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Report a Bug</Text>
-        <View style={{ width: 40 }} />
-      </View>
+      <ScreenHeader title="Report a Bug" />
 
       {/* ── Content ── */}
       <KeyboardAvoidingView

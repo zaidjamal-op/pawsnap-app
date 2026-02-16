@@ -1,4 +1,5 @@
 import { BrandColors } from '@/constants/theme';
+import ScreenHeader from '@/components/ScreenHeader';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
@@ -19,15 +20,14 @@ export default function CheckInDetailScreen() {
   return (
     <View style={styles.container}>
       {/* ─── Header ─── */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Check-in Details</Text>
-        <TouchableOpacity style={[styles.backBtn, { opacity: 0 }]}>
-           <Ionicons name="ellipsis-vertical" size={24} color="#FFFFFF" />
-        </TouchableOpacity>
-      </View>
+      <ScreenHeader
+        title="Check-in Details"
+        rightElement={
+            <TouchableOpacity onPress={() => { /* Handle menu */ }}>
+                <Ionicons name="ellipsis-vertical" size={24} color="#FFFFFF" />
+            </TouchableOpacity>
+        }
+      />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.dateBanner}>

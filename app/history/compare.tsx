@@ -1,4 +1,5 @@
 import { BrandColors } from '@/constants/theme';
+import ScreenHeader from '@/components/ScreenHeader';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useRef } from 'react';
@@ -53,13 +54,7 @@ export default function CompareScreen() {
   return (
     <View style={styles.container}>
       {/* ─── Header ─── */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Compare Photos</Text>
-        <View style={{ width: 40 }} />
-      </View>
+      <ScreenHeader title="Compare Photos" />
 
       <View style={styles.compareContainer} {...panResponder.panHandlers}>
         {/* Labels */}

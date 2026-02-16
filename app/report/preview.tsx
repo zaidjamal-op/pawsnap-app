@@ -1,4 +1,5 @@
 import { BrandColors } from '@/constants/theme';
+import ScreenHeader from '@/components/ScreenHeader';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
@@ -102,19 +103,14 @@ export default function ReportPreviewScreen() {
   return (
     <View style={styles.container}>
       {/* ── Header ── */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backBtn}
-          onPress={() => router.back()}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="arrow-back" size={22} color="#CBD5E1" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Report Preview</Text>
-        <View style={styles.premiumBadge}>
-          <Text style={styles.premiumBadgeText}>PREMIUM</Text>
-        </View>
-      </View>
+      <ScreenHeader
+        title="Report Preview"
+        rightElement={
+          <View style={styles.premiumBadge}>
+            <Text style={styles.premiumBadgeText}>PREMIUM</Text>
+          </View>
+        }
+      />
 
       {/* ── Scrollable Content ── */}
       <ScrollView
@@ -313,18 +309,20 @@ const styles = StyleSheet.create({
     letterSpacing: -0.3,
   },
   premiumBadge: {
-    backgroundColor: 'rgba(45,212,191,0.15)',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 999,
+    backgroundColor: 'rgba(45,212,191,0.1)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(45,212,191,0.3)',
+    borderColor: 'rgba(45,212,191,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   premiumBadgeText: {
-    fontSize: 9,
-    fontWeight: '800',
+    fontSize: 10,
+    fontWeight: '700',
     color: BrandColors.primary,
-    letterSpacing: 1.5,
+    letterSpacing: 0.5,
   },
 
   /* ── Section ── */

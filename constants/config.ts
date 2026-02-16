@@ -1,0 +1,4 @@
+export const AppConfig = {
+  version: '2.4.1',
+  build: '890',
+};

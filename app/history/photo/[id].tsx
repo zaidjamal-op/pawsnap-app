@@ -1,4 +1,5 @@
 import { BrandColors } from '@/constants/theme';
+import ScreenHeader from '@/components/ScreenHeader';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
@@ -17,21 +18,7 @@ export default function PhotoDetailScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.headerRow}>
-          <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color="#000000" />
-            {/* Note: In light mode placeholder HTML it used dark text, but app is dark theme mostly. 
-               The html reference for 'Photo Detail' shows a light header in one version? 
-               Wait, the user requested "Stick to design system". 
-               The 3rd HTML provided shows "Pawsnap Photo Detail" with dark text on white header in body class 
-               BUT user app is dark mode. I will stick to dark mode for consistency with previous screens.
-            */}
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Oct 24, 2023</Text>
-          <View style={{ width: 40 }} />
-        </View>
-      </View>
+      <ScreenHeader title="Oct 24, 2023" />
 
       <View style={styles.content}>
         <View style={styles.imageContainer}>
@@ -92,21 +79,6 @@ export default function PhotoDetailScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: BrandColors.background },
-  header: {
-    paddingTop: Platform.OS === 'ios' ? 60 : 40,
-    paddingHorizontal: 24,
-    paddingBottom: 20,
-    backgroundColor: '#FFFFFF', // Reference uses white header for this screen? 
-    // Wait, the HTML has "bg-white dark:bg-background-dark".
-    // I should use dark mode if consistency is key.
-    backgroundColor: BrandColors.background,
-    borderBottomWidth: 1,
-    borderBottomColor: '#1F2937',
-  },
-  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  backBtn: { padding: 4 },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: '#FFFFFF' },
-  
   content: { flex: 1, padding: 24, flexDirection: 'column' },
   imageContainer: {
     width: '100%',

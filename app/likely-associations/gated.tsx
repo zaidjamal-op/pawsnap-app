@@ -1,4 +1,5 @@
 import { BrandColors } from '@/constants/theme';
+import ScreenHeader from '@/components/ScreenHeader';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
@@ -17,17 +18,7 @@ export default function LikelyAssociationsGatedScreen() {
   return (
     <View style={styles.container}>
       {/* ─── Header ─── */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backBtn}
-          onPress={() => router.back()}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Likely Associations</Text>
-        <View style={{ width: 40 }} />
-      </View>
+      <ScreenHeader title="Likely Associations" />
 
       <View style={styles.content}>
         {/* ─── Blurred/Gated Content Teaser ─── */}
@@ -208,7 +199,7 @@ const styles = StyleSheet.create({
     backgroundColor: BrandColors.primary,
     opacity: 0.1,
     transform: [{ scale: 1.5 }],
-    blurRadius: 40, // View style blurRadius works on iOS/Android often
+    // blurRadius: 40, // View style blurRadius works on iOS/Android often
   },
   upsellBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
