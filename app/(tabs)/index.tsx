@@ -1,5 +1,6 @@
 import { BrandColors } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import {
@@ -29,6 +30,7 @@ const QUICK_ACTIONS = [
 ];
 
 export default function HomeScreen() {
+  const router = useRouter();
   return (
     <View style={styles.container}>
       <ScrollView
@@ -74,7 +76,7 @@ export default function HomeScreen() {
             <Text style={styles.statusDesc}>
               Track {PET_NAME}'s itch level daily to build a comprehensive health profile.
             </Text>
-            <TouchableOpacity style={styles.logButton} activeOpacity={0.85}>
+            <TouchableOpacity style={styles.logButton} activeOpacity={0.85} onPress={() => router.push('/checkin/daily')}>
               <Ionicons name="add" size={22} color={BrandColors.background} />
               <Text style={styles.logButtonText}>Log today's check-in</Text>
             </TouchableOpacity>
@@ -83,21 +85,28 @@ export default function HomeScreen() {
 
         {/* Quick Actions */}
         <Animated.View entering={FadeInDown.delay(350).duration(450)} style={styles.actionsGrid}>
-          {QUICK_ACTIONS.map((action) => (
-            <TouchableOpacity key={action.label} style={styles.actionCard} activeOpacity={0.7}>
-              <View
-                style={[
-                  styles.actionIconCircle,
-                  action.color === '#EF4444'
-                    ? { backgroundColor: 'rgba(239,68,68,0.15)' }
-                    : { backgroundColor: 'rgba(31,41,55,0.8)' },
-                ]}
-              >
-                <Ionicons name={action.icon} size={20} color={action.color} />
-              </View>
-              <Text style={styles.actionLabel}>{action.label}</Text>
-            </TouchableOpacity>
-          ))}
+          {QUICK_ACTIONS.map((action) => {
+            const handlePress = () => {
+              if (action.label === 'Flare Mode') router.push('/checkin/flare');
+              else if (action.label === 'Add Photo') router.push('/photo/area-picker');
+              else if (action.label === 'Export') router.push('/report/range');
+            };
+            return (
+              <TouchableOpacity key={action.label} style={styles.actionCard} activeOpacity={0.7} onPress={handlePress}>
+                <View
+                  style={[
+                    styles.actionIconCircle,
+                    action.color === '#EF4444'
+                      ? { backgroundColor: 'rgba(239,68,68,0.15)' }
+                      : { backgroundColor: 'rgba(31,41,55,0.8)' },
+                  ]}
+                >
+                  <Ionicons name={action.icon} size={20} color={action.color} />
+                </View>
+                <Text style={styles.actionLabel}>{action.label}</Text>
+              </TouchableOpacity>
+            );
+          })}
         </Animated.View>
 
         {/* Insight Teaser */}
