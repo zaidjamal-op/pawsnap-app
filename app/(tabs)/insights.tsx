@@ -140,9 +140,18 @@ export default function InsightsScreen() {
             <Text style={styles.headerTitle}>Weekly Summary</Text>
             <Text style={styles.headerDate}>Oct 12 – Oct 18, 2023</Text>
           </View>
-          <TouchableOpacity style={styles.calendarBtn} activeOpacity={0.7}>
-            <Ionicons name="calendar-outline" size={20} color={BrandColors.primary} />
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', gap: 12 }}>
+             <TouchableOpacity 
+                style={styles.recapBtn} 
+                activeOpacity={0.7}
+                onPress={() => router.push('/likely-associations/recap')}
+             >
+                <Ionicons name="newspaper-outline" size={20} color={BrandColors.primary} />
+             </TouchableOpacity>
+             <TouchableOpacity style={styles.calendarBtn} activeOpacity={0.7}>
+                <Ionicons name="calendar-outline" size={20} color={BrandColors.primary} />
+             </TouchableOpacity>
+          </View>
         </Animated.View>
 
         {/* Itch Intensity Chart Card */}
@@ -303,7 +312,7 @@ export default function InsightsScreen() {
         <Animated.View entering={FadeInDown.delay(300).duration(450)}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Top Suspected Associations</Text>
-            <TouchableOpacity activeOpacity={0.7}>
+            <TouchableOpacity activeOpacity={0.7} onPress={() => router.push('/likely-associations')}>
               <Text style={styles.seeAll}>See All</Text>
             </TouchableOpacity>
           </View>
@@ -342,7 +351,7 @@ export default function InsightsScreen() {
           <TouchableOpacity
             style={styles.primaryBtn}
             activeOpacity={0.85}
-            onPress={() => router.push('/premium-insights')}
+            onPress={() => router.push('/likely-associations/gated')}
           >
             <Ionicons name="analytics" size={20} color={BrandColors.background} />
             <Text style={styles.primaryBtnText}>View Full Insights</Text>
@@ -384,6 +393,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.08)',
+  },
+  recapBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(45,212,189,0.1)', // Tinted bg for prominence
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(45,212,189,0.3)',
   },
 
   /* Chart card */
