@@ -66,11 +66,11 @@ export default function BaselineScreen({ petName = 'your pet', onFinish, onSkip 
         keyboardShouldPersistTaps="handled"
       >
         {/* Progress bar */}
-        <Animated.View entering={FadeIn.duration(400)} style={styles.progressRow}>
+        {/* <Animated.View entering={FadeIn.duration(400)} style={styles.progressRow}>
           <View style={[styles.progressDot, styles.progressActive]} />
           <View style={styles.progressDot} />
           <View style={styles.progressDot} />
-        </Animated.View>
+        </Animated.View> */}
 
         {/* Header */}
         <Animated.View entering={FadeInDown.delay(100).duration(500)} style={styles.headerBlock}>

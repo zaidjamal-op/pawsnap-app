@@ -6,12 +6,11 @@ export default function WelcomePage() {
   const router = useRouter();
 
   const handleGetStarted = () => {
-    router.push('/onboarding');
+    router.push('/disclaimer');
   };
 
   const handleLogin = () => {
-    // For now, skip to main app (same as completing onboarding)
-    router.replace('/(tabs)');
+    router.replace('/auth/sign-in');
   };
 
   return (

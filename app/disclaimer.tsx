@@ -6,7 +6,7 @@ export default function DisclaimerPage() {
   const router = useRouter();
 
   const handleAccept = () => {
-    router.replace('/add-pet');
+    router.replace('/auth/sign-in');
   };
 
   return <DisclaimerScreen onAccept={handleAccept} />;
