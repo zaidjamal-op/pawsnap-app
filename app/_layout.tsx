@@ -1,4 +1,7 @@
+import { BrandColors } from '@/constants/theme';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { PetProvider } from '@/context/PetContext';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -13,14 +16,15 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          animation: 'fade',
-          contentStyle: { backgroundColor: '#0B0F14' },
-        }}
-      >
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <PetProvider>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: BrandColors.background },
+          }}
+        >
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="welcome" options={{ headerShown: false }} />
         <Stack.Screen
@@ -345,7 +349,9 @@ export default function RootLayout() {
         <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
       </Stack>
       <StatusBar style="light" />
-    </ThemeProvider>
+      </ThemeProvider>
+      </PetProvider>
+    </GestureHandlerRootView>
   );
 }
 

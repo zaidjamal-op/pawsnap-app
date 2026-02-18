@@ -13,49 +13,22 @@ import {
   View,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-
-// Mock pet data
-interface Pet {
-  id: string;
-  name: string;
-  avatar: string;
-  active: boolean;
-  lastCheckIn: string;
-}
-
-const PETS: Pet[] = [
-  {
-    id: '1',
-    name: 'Luna',
-    avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDHnuuatuRMi9VNzS8wYJjMROQvj-hcsDzwr-d1x0F0MEZ2zll9CJ0Bj6rVgI615ARPzcO2z1zua3CqG7p7gaWyXJ4TNoc76YkMr1uEYmLwJLnZKgtiVZ-JNBcB8XYFJvG0mNRnmA8Il0NGny8Kz6DBVc4cklsMPZGNtjvTZKu1KMZ3GKbpXaR09H1i0wZwglV4RQ7wUEtAc6txFMN6i63zBQl3jj8dvxB-pNh0V94kxqV0c9L2iPTUYfSWieL3jMeujOte9R9cTvih',
-    active: true,
-    lastCheckIn: '4h ago',
-  },
-  {
-    id: '2',
-    name: 'Charlie',
-    avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAw7BaKYie_BZTlv3PJ0EafkOMwzh4r9WUSFNn6lvS95y-WIcEncZgZNSVn4Vl2mVc7IieypeA7D0LLxUpXojcYFueevgCqiOK45m06BV-onPLG721mFpszIbu15JY-vwTPajdr-M2DcbX1PLNyBMJ9xlhzgRJO6SGn3hpa-K9-wy7pAmYrduPnwTpaBeYpXdy5wmkJ-Zj_1zOx4CxdgIW0LmTbeXSoN4qrYU0avRhUzgzgYHKqN_OiuxiPcTs8IxzvfJH9YOXZs8lb',
-    active: false,
-    lastCheckIn: '1d ago',
-  },
-  {
-    id: '3',
-    name: 'Bella',
-    avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBYGieZWbS42z7PL-HKbCm7jISlIcjA7AqOfZ5cA1kc1jgOPCrIAHkqXHfyRlK4UGsJX_TDOfdtd15XXIMCBWikWaJWRgyQjmqZb8tynUFNqrREhTVRWQhbTaoLXcCp061OMZD53HPYAE7K-JncUFOmSYj7x-YCEVbFyr1JWIkEmMLb7dNd5ubrvWU7aAX7b2ArOrEJUPtEHSeDkt3YP0RBJB-RvTJ8V1-3ZLSM8jUNL0pqlcPbjqgC3LBdSGkCPz9iLB0na7HlFes3',
-    active: false,
-    lastCheckIn: '2d ago',
-  },
-  {
-    id: '4',
-    name: 'Max',
-    avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB6JjHEp9XntEvYxzl-Z5bwKBxm2f1HV3NroeSjOLKhb1lbf5QS0b5mBG9O9wkgOsfa7izEaQUwTzfTVpYwqDhqScLLd2YMLvMoT56HsVioSrevH38Zpp-EWpq7Nujoz23RKygxgX7DEqHTLgWMgXlhhTTQcnc6_Y67z48timR2rjVSXHLLFLb7l7d89kzoumMXvM-aQjsGVJtkJ2nhKbVjBuxTNDd7JGLHaTO4iFGz7YMIwj-e6OUj4OmY-n6mXiSU7i2xFSFyQ4eD',
-    active: false,
-    lastCheckIn: 'No recent data',
-  },
-];
+import { usePets } from '@/context/PetContext';
 
 export default function PetsListScreen() {
   const router = useRouter();
+  const { pets, activePetId, setActivePet } = usePets();
+
+  const handlePetPress = (id: string) => {
+    setActivePet(id);
+  };
+
+  const handleEditPress = (id: string) => {
+    router.push({
+      pathname: '/profile/edit-pet',
+      params: { id }
+    });
+  };
 
   return (
     <View style={styles.container}>
@@ -68,65 +41,81 @@ export default function PetsListScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Pet Cards */}
-        {PETS.map((pet, i) => (
-          <Animated.View
-            key={pet.id}
-            entering={FadeInDown.delay(80 + i * 80).duration(400)}
-          >
-            <TouchableOpacity
-              style={[
-                styles.petCard,
-                pet.active && styles.petCardActive,
-              ]}
-              activeOpacity={0.8}
-              onPress={() => router.push('/profile/edit-pet')}
+        {pets.map((pet, i) => {
+          const isActive = pet.id === activePetId;
+          return (
+            <Animated.View
+              key={pet.id}
+              entering={FadeInDown.delay(80 + i * 80).duration(400)}
             >
-              <View style={styles.petLeft}>
-                <View style={styles.petAvatarWrap}>
-                  <Image
-                    source={{ uri: pet.avatar }}
-                    style={[styles.petAvatar, !pet.active && { opacity: 0.7 }]}
-                  />
-                  {pet.active && (
-                    <View style={styles.activeDot}>
-                      <MaterialIcons name="check" size={10} color={BrandColors.background} />
-                    </View>
-                  )}
-                </View>
-                <View>
-                  <View style={styles.petNameRow}>
-                    <Text style={styles.petName}>{pet.name}</Text>
-                    {pet.active && (
-                      <View style={styles.activeBadge}>
-                        <Text style={styles.activeBadgeText}>Active</Text>
+              <TouchableOpacity
+                style={[
+                  styles.petCard,
+                  isActive && styles.petCardActive,
+                ]}
+                activeOpacity={0.8}
+                onPress={() => handlePetPress(pet.id)}
+              >
+                <View style={styles.petLeft}>
+                  <View style={styles.petAvatarWrap}>
+                    <Image
+                      source={{ uri: pet.avatar }}
+                      style={[styles.petAvatar, !isActive && { opacity: 0.7 }]}
+                    />
+                    {isActive && (
+                      <View style={styles.activeDot}>
+                        <MaterialIcons name="check" size={10} color={BrandColors.background} />
                       </View>
                     )}
                   </View>
-                  <View style={styles.checkInRow}>
-                    <MaterialIcons
-                      name={pet.lastCheckIn === 'No recent data' ? 'history' : 'schedule'}
-                      size={13}
-                      color="#6B7280"
-                    />
-                    <Text style={styles.checkInText}>
-                      {pet.lastCheckIn === 'No recent data'
-                        ? pet.lastCheckIn
-                        : `Last check-in: ${pet.lastCheckIn}`}
-                    </Text>
+                  <View>
+                    <View style={styles.petNameRow}>
+                      <Text style={styles.petName}>{pet.name}</Text>
+                      {isActive && (
+                        <View style={styles.activeBadge}>
+                          <Text style={styles.activeBadgeText}>Active</Text>
+                        </View>
+                      )}
+                    </View>
+                    <View style={styles.checkInRow}>
+                      <MaterialIcons
+                        name={pet.lastCheckIn ? 'schedule' : 'history'}
+                        size={13}
+                        color="#6B7280"
+                      />
+                      <Text style={styles.checkInText}>
+                        {pet.lastCheckIn
+                          ? `Last check-in: ${pet.lastCheckIn}`
+                          : 'No recent data'
+                        }
+                      </Text>
+                    </View>
                   </View>
                 </View>
-              </View>
-              <Ionicons name="chevron-forward" size={18} color="rgba(148,163,184,0.3)" />
-            </TouchableOpacity>
-          </Animated.View>
-        ))}
+                <TouchableOpacity 
+                  onPress={() => handleEditPress(pet.id)}
+                  hitSlop={20}
+                >
+                  <Ionicons name="pencil" size={18} color="rgba(148,163,184,0.3)" />
+                </TouchableOpacity>
+              </TouchableOpacity>
+            </Animated.View>
+          );
+        })}
 
         <View style={{ height: 100 }} />
       </ScrollView>
 
       {/* ─── Add Pet CTA ─── */}
       <View style={styles.ctaWrap}>
-        <TouchableOpacity style={styles.ctaBtn} activeOpacity={0.85}>
+        <TouchableOpacity 
+          style={styles.ctaBtn} 
+          activeOpacity={0.85}
+          onPress={() => router.push({
+            pathname: '/add-pet',
+            params: { returnTo: '/profile/pets' }
+          })}
+        >
           <MaterialIcons name="add" size={22} color={BrandColors.background} />
           <Text style={styles.ctaText}>Add a new pet</Text>
         </TouchableOpacity>

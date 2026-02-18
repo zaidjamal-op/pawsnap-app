@@ -75,7 +75,7 @@ export default function ChooseProtocolScreen() {
             <TouchableOpacity
               style={styles.protocolCard}
               activeOpacity={0.8}
-              onPress={() => router.push('/protocol/customize')}
+              onPress={() => router.push({ pathname: '/protocol/customize', params: { title: protocol.title } })}
             >
               {/* Icon */}
               <View style={styles.protocolIconCircle}>

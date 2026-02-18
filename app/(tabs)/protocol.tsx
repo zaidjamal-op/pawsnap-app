@@ -3,6 +3,7 @@ import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter } from 'expo-router';
 import React from 'react';
+import { usePets } from '@/context/PetContext';
 import {
   Platform,
   ScrollView,
@@ -14,31 +15,22 @@ import {
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import Svg, { Circle, Defs, LinearGradient as SvgGradient, Stop } from 'react-native-svg';
 
-// ─── Constants ───
-const PROTOCOL_DAYS = 14;
-const CURRENT_DAY = 5;
-const COMPLIANCE = 82;
-
 // SVG Circle constants
 const CIRCLE_SIZE = 240;
 const STROKE_WIDTH = 10;
 const RADIUS = (CIRCLE_SIZE - STROKE_WIDTH) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
-const PROGRESS = CURRENT_DAY / PROTOCOL_DAYS;
-const DASH_OFFSET = CIRCUMFERENCE * (1 - PROGRESS);
 
 export default function ProtocolScreen() {
   const router = useRouter();
-  const [isProtocolActive, setIsProtocolActive] = React.useState(false);
-
-  // Check AsyncStorage every time this tab gains focus
-  useFocusEffect(
-    React.useCallback(() => {
-      AsyncStorage.getItem('protocol_active').then((val) => {
-        setIsProtocolActive(val === 'true');
-      });
-    }, [])
-  );
+  const { activeProtocol } = usePets();
+  
+  // Derived state
+  const isProtocolActive = !!activeProtocol;
+  const currentDay = activeProtocol?.day || 1;
+  const protocolDays = activeProtocol?.totalDays || 14;
+  const progress = currentDay / protocolDays;
+  const dashOffset = CIRCUMFERENCE * (1 - progress);
 
   // ────────────────────────────────────────────────
   // EMPTY STATE
@@ -151,7 +143,7 @@ export default function ProtocolScreen() {
           {/* Protocol Tag */}
           <View style={styles.protocolTag}>
             <MaterialIcons name="healing" size={14} color={BrandColors.primary} />
-            <Text style={styles.protocolTagText}>SKIN BARRIER ROUTINE</Text>
+            <Text style={styles.protocolTagText}>{activeProtocol?.name?.toUpperCase() || 'PROTOCOL'}</Text>
           </View>
 
           {/* Circular Progress */}
@@ -181,7 +173,7 @@ export default function ProtocolScreen() {
                 strokeWidth={STROKE_WIDTH}
                 fill="transparent"
                 strokeDasharray={CIRCUMFERENCE}
-                strokeDashoffset={DASH_OFFSET}
+                strokeDashoffset={dashOffset}
                 strokeLinecap="round"
                 rotation="-90"
                 origin={`${CIRCLE_SIZE / 2}, ${CIRCLE_SIZE / 2}`}
@@ -190,14 +182,14 @@ export default function ProtocolScreen() {
             {/* Inner Content */}
             <View style={styles.ringInner}>
               <Text style={styles.ringLabel}>Current Progress</Text>
-              <Text style={styles.ringDay}>Day {CURRENT_DAY}</Text>
-              <Text style={styles.ringOf}>of {PROTOCOL_DAYS}</Text>
+              <Text style={styles.ringDay}>Day {currentDay}</Text>
+              <Text style={styles.ringOf}>of {protocolDays}</Text>
             </View>
           </View>
 
           {/* Compliance */}
           <View style={styles.complianceRow}>
-            <Text style={styles.complianceValue}>{COMPLIANCE}% Compliance</Text>
+            <Text style={styles.complianceValue}>100% Compliance</Text>
             <Text style={styles.complianceDesc}>
               Great job! You're on track to{'\n'}complete the routine.
             </Text>

@@ -1,156 +1,179 @@
-import { BrandColors } from '@/constants/theme';
 import ScreenHeader from '@/components/ScreenHeader';
-import { Ionicons } from '@expo/vector-icons';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { BrandColors } from '@/constants/theme';
+import { Media, usePets } from '@/context/PetContext';
+import { Video, ResizeMode } from 'expo-av';
+import { Image } from 'expo-image';
+import { useLocalSearchParams } from 'expo-router';
 import React from 'react';
-import {
-    Image,
-    Platform,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-} from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
-export default function PhotoDetailScreen() {
-  const router = useRouter();
-  const { id } = useLocalSearchParams();
+const getParam = (param: string | string[] | undefined) =>
+  Array.isArray(param) ? param[0] : param;
+
+export default function MediaDetailScreen() {
+  const { media } = usePets();
+  const params = useLocalSearchParams();
+
+  const id = getParam(params.id);
+  const uriParam = getParam(params.uri);
+  const typeParam = getParam(params.type) as Media['type'] | undefined;
+  const dateParam = getParam(params.date);
+  const areaParam = getParam(params.area);
+  const notesParam = getParam(params.notes);
+
+  const candidateItems = id ? media.filter((m) => m.id === id) : [];
+
+  const item = candidateItems.find(
+    (m) =>
+      (!uriParam || m.uri === uriParam) &&
+      (!typeParam || m.type === typeParam) &&
+      (!dateParam || m.date === dateParam),
+  ) ?? candidateItems.find((m) => (!uriParam ? true : m.uri === uriParam)) ?? (candidateItems.length === 1 ? candidateItems[0] : null);
+
+  const resolved: Media | null = item
+    ? item
+    : id && uriParam && typeParam && dateParam
+      ? {
+          id,
+          petId: '',
+          uri: uriParam,
+          type: typeParam,
+          date: dateParam,
+          area: areaParam || undefined,
+          notes: notesParam || undefined,
+        }
+      : null;
+
+  if (!resolved) {
+    return (
+      <View style={styles.container}>
+        <ScreenHeader title="Media" />
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyTitle}>Media not found</Text>
+          <Text style={styles.emptyText}>
+            This item may have been removed from your history.
+          </Text>
+        </View>
+      </View>
+    );
+  }
+
+  const displayDate = new Date(resolved.date).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 
   return (
     <View style={styles.container}>
-      <ScreenHeader title="Oct 24, 2023" />
+      <ScreenHeader title={displayDate} />
 
-      <View style={styles.content}>
-        <View style={styles.imageContainer}>
-          <Image 
-            source={{ uri: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=600' }} 
-            style={styles.image} 
-            resizeMode="cover"
-          />
-          <TouchableOpacity style={styles.zoomBtn}>
-            <Ionicons name="scan-outline" size={24} color="#FFFFFF" />
-          </TouchableOpacity>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <View style={styles.previewCard}>
+          {resolved.type === 'photo' ? (
+            <Image source={{ uri: resolved.uri }} style={styles.preview} contentFit="contain" />
+          ) : (
+            <Video
+              source={{ uri: resolved.uri }}
+              style={styles.preview}
+              useNativeControls
+              resizeMode={ResizeMode.CONTAIN}
+              shouldPlay
+            />
+          )}
         </View>
 
-        <View style={styles.detailsCard}>
-          <View style={styles.detailItem}>
-            <View style={styles.iconCircle}>
-              <Ionicons name="paw" size={20} color={BrandColors.primary} />
-            </View>
-            <View>
-              <Text style={styles.label}>AREA</Text>
-              <Text style={styles.value}>Front Paw</Text>
-            </View>
+        <View style={styles.metaCard}>
+          <View style={styles.metaRow}>
+            <Text style={styles.metaLabel}>Type</Text>
+            <Text style={styles.metaValue}>{resolved.type === 'photo' ? 'Photo' : 'Video'}</Text>
           </View>
-          
-          <View style={styles.divider} />
-
-          <View style={styles.detailItem}>
-            <View style={[styles.iconCircle, { marginTop: 2 }]}>
-              <Ionicons name="create-outline" size={20} color={BrandColors.primary} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.label}>NOTE</Text>
-              <Text style={styles.noteText}>
-                Redness between toes. Seems sensitive to touch. Applied balm after photo.
-              </Text>
-            </View>
+          <View style={styles.metaRow}>
+            <Text style={styles.metaLabel}>Area</Text>
+            <Text style={styles.metaValue}>{resolved.area || 'General'}</Text>
           </View>
+          {resolved.notes ? (
+            <View style={styles.notesWrap}>
+              <Text style={styles.metaLabel}>Notes</Text>
+              <Text style={styles.notes}>{resolved.notes}</Text>
+            </View>
+          ) : null}
         </View>
-
-        <View style={styles.footer}>
-          <TouchableOpacity 
-             style={styles.compareBtn}
-             onPress={() => router.push('/history/compare')}
-             activeOpacity={0.8}
-          >
-            <Ionicons name="images-outline" size={20} color={BrandColors.background} />
-            <Text style={styles.compareText}>Compare</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={styles.deleteBtn}>
-            <Ionicons name="trash-outline" size={24} color="#EF4444" />
-          </TouchableOpacity>
-        </View>
-      </View>
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: BrandColors.background },
-  content: { flex: 1, padding: 24, flexDirection: 'column' },
-  imageContainer: {
-    width: '100%',
-    aspectRatio: 4/5,
-    borderRadius: 24,
-    overflow: 'hidden',
-    marginBottom: 24,
-    backgroundColor: '#1F2937',
-    position: 'relative',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.3,
-    shadowRadius: 20,
-    elevation: 10,
+  container: {
+    flex: 1,
+    backgroundColor: BrandColors.background,
   },
-  image: { width: '100%', height: '100%' },
-  zoomBtn: {
-    position: 'absolute',
-    bottom: 16,
-    right: 16,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    padding: 10,
-    borderRadius: 30,
-    backdropFilter: 'blur(10px)',
-  },
-
-  detailsCard: {
-    backgroundColor: BrandColors.surface,
-    borderRadius: 20,
+  content: {
     padding: 20,
-    borderWidth: 1,
-    borderColor: '#1F2937',
-  },
-  detailItem: { flexDirection: 'row', gap: 16 },
-  iconCircle: {
-    width: 40, height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(45,212,191,0.1)',
-    justifyContent: 'center', alignItems: 'center',
-  },
-  label: { fontSize: 11, fontWeight: '700', color: '#9CA3AF', letterSpacing: 1, marginBottom: 4 },
-  value: { fontSize: 16, fontWeight: '600', color: '#FFFFFF' },
-  noteText: { fontSize: 15, color: '#D1D5DB', lineHeight: 22 },
-  divider: { height: 1, backgroundColor: '#1F2937', marginVertical: 16 },
-
-  footer: {
-    marginTop: 'auto',
-    flexDirection: 'row',
+    paddingBottom: 28,
     gap: 16,
   },
-  compareBtn: {
-    flex: 1,
-    backgroundColor: BrandColors.primary,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 18,
-    borderRadius: 16,
-    shadowColor: BrandColors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
+  previewCard: {
+    width: '100%',
+    aspectRatio: 3 / 4,
+    borderRadius: 18,
+    overflow: 'hidden',
+    backgroundColor: '#0F172A',
   },
-  compareText: { fontSize: 18, fontWeight: '700', color: BrandColors.background },
-  deleteBtn: {
-    width: 64,
-    backgroundColor: BrandColors.surface,
-    justifyContent: 'center',
-    alignItems: 'center',
+  preview: {
+    width: '100%',
+    height: '100%',
+  },
+  metaCard: {
     borderRadius: 16,
+    backgroundColor: '#111827',
     borderWidth: 1,
     borderColor: '#1F2937',
+    padding: 16,
+    gap: 12,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  metaLabel: {
+    color: '#94A3B8',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  metaValue: {
+    color: '#E5E7EB',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  notesWrap: {
+    gap: 6,
+    borderTopWidth: 1,
+    borderTopColor: '#1F2937',
+    paddingTop: 12,
+  },
+  notes: {
+    color: '#D1D5DB',
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  emptyState: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 28,
+    gap: 8,
+  },
+  emptyTitle: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  emptyText: {
+    color: '#94A3B8',
+    fontSize: 14,
+    textAlign: 'center',
   },
 });

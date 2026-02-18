@@ -52,7 +52,11 @@ export default function SettingsScreen() {
           onPress={() => router.push('/profile/pets')}
           activeOpacity={0.7}
         >
-          <MaterialIcons name="pets" size={20} color={BrandColors.primary} />
+          <Image 
+            source={require('@/assets/images/pawsnap-logo.png')} 
+            style={{ width: 24, height: 24 }} 
+            resizeMode="contain"
+          />
           <Text style={styles.rowText}>My Pets</Text>
           <Ionicons name="chevron-forward" size={18} color="rgba(148,163,184,0.4)" />
         </TouchableOpacity>
@@ -91,7 +95,7 @@ export default function SettingsScreen() {
         </TouchableOpacity>
 
         {/* Help & Feedback */}
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={styles.row}
           onPress={() => router.push('/support')}
           activeOpacity={0.7}
@@ -99,7 +103,7 @@ export default function SettingsScreen() {
           <Ionicons name="help-buoy-outline" size={20} color={BrandColors.primary} />
           <Text style={styles.rowText}>Help & Feedback</Text>
           <Ionicons name="chevron-forward" size={18} color="rgba(148,163,184,0.4)" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         {/* Upgrade to Premium */}
         <TouchableOpacity

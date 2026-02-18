@@ -1,7 +1,8 @@
 import { BrandColors } from '@/constants/theme';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import React, { useState, useEffect } from 'react';
+import { usePets } from '@/context/PetContext';
 import {
   Alert,
   Platform,
@@ -13,6 +14,7 @@ import {
   View,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import ItchSlider from '@/components/ItchSlider';
 
 const TRIGGERS = [
   'New food',
@@ -23,10 +25,26 @@ const TRIGGERS = [
 ];
 
 export default function FlareModeScreen() {
-  const router = useRouter();
+  const router = useRouter(); // Define router here
+  const { activePetId, addFlare, updateFlare, deleteFlare, flares } = usePets(); 
+  const params = useLocalSearchParams(); 
+  const editId = params.id as string;
+
   const [itchLevel, setItchLevel] = useState(7);
   const [selectedTriggers, setSelectedTriggers] = useState<string[]>(['New food', 'Grooming']);
   const [notes, setNotes] = useState('');
+
+  // Load existing data if editing
+  useEffect(() => {
+    if (editId) {
+      const existing = flares.find(f => f.id === editId);
+      if (existing) {
+        setItchLevel(existing.itchLevel);
+        setSelectedTriggers(existing.triggers);
+        setNotes(existing.notes || '');
+      }
+    }
+  }, [editId, flares]);
 
   const toggleTrigger = (trigger: string) => {
     setSelectedTriggers((prev) =>
@@ -35,19 +53,61 @@ export default function FlareModeScreen() {
   };
 
   const handleSave = () => {
-    Alert.alert('Flare Saved', 'Your flare has been logged.', [
-      { text: 'OK', onPress: () => router.back() },
-    ]);
+    if (!activePetId) return;
+
+    const flareData = {
+      petId: activePetId,
+      date: new Date().toISOString(),
+      itchLevel,
+      triggers: selectedTriggers,
+      notes,
+    };
+
+    if (editId) {
+      updateFlare(editId, flareData);
+      Alert.alert('Updated', 'Flare updated successfully.');
+    } else {
+      addFlare(flareData);
+      Alert.alert('Flare Saved', 'Your flare has been logged.');
+    }
+    router.back();
+  };
+
+   const handleDelete = () => {
+    if (editId) {
+       Alert.alert('Delete Flare', 'Are you sure?', [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Delete', 
+          style: 'destructive', 
+          onPress: () => {
+            deleteFlare(editId);
+            router.back();
+          }
+        }
+      ]);
+    }
   };
 
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Flare Mode</Text>
-        <TouchableOpacity style={styles.closeBtn} onPress={() => router.back()} activeOpacity={0.7}>
-          <Ionicons name="close" size={24} color="#9CA3AF" />
-        </TouchableOpacity>
+        <Text style={styles.headerTitle}>{editId ? 'Edit Flare' : 'Flare Mode'}</Text>
+        <View style={{ flexDirection: 'row', gap: 12 }}>
+          {editId && (
+            <TouchableOpacity 
+              style={[styles.closeBtn, { backgroundColor: 'rgba(239,68,68,0.1)' }]} 
+              onPress={handleDelete}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="trash-outline" size={20} color="#EF4444" />
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity style={styles.closeBtn} onPress={() => router.back()} activeOpacity={0.7}>
+            <Ionicons name="close" size={24} color="#9CA3AF" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView
@@ -63,45 +123,7 @@ export default function FlareModeScreen() {
 
         {/* ─── Itch Slider Card ─── */}
         <Animated.View entering={FadeInDown.delay(140).duration(400)} style={styles.itchCard}>
-          <View style={styles.itchCardHeader}>
-            <Text style={styles.itchLabel}>ITCH RIGHT NOW</Text>
-            <View style={styles.itchValueWrap}>
-              <Text style={styles.itchValue}>{itchLevel}</Text>
-              <Text style={styles.itchMax}>/10</Text>
-            </View>
-          </View>
-
-          {/* Slider track */}
-          <View style={styles.sliderTrack}>
-            <View style={styles.trackBg} />
-            <View style={[styles.trackFill, { width: `${itchLevel * 10}%` }]} />
-            <TouchableOpacity
-              style={[styles.sliderThumb, { left: `${itchLevel * 10}%` }]}
-              activeOpacity={1}
-            />
-          </View>
-
-          {/* Stepper */}
-          <View style={styles.stepperRow}>
-            <TouchableOpacity
-              style={styles.stepperBtn}
-              onPress={() => setItchLevel(Math.max(0, itchLevel - 1))}
-              activeOpacity={0.7}
-            >
-              <Ionicons name="remove" size={16} color="#9CA3AF" />
-            </TouchableOpacity>
-            <View style={styles.sliderLabels}>
-              <Text style={styles.sliderLabelText}>No itch</Text>
-              <Text style={styles.sliderLabelText}>Unbearable</Text>
-            </View>
-            <TouchableOpacity
-              style={styles.stepperBtn}
-              onPress={() => setItchLevel(Math.min(10, itchLevel + 1))}
-              activeOpacity={0.7}
-            >
-              <Ionicons name="add" size={16} color="#9CA3AF" />
-            </TouchableOpacity>
-          </View>
+          <ItchSlider value={itchLevel} onValueChange={setItchLevel} />
         </Animated.View>
 
         {/* ─── Triggers ─── */}

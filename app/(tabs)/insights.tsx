@@ -19,6 +19,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, {
   Circle,
   Defs,
@@ -128,7 +129,7 @@ export default function InsightsScreen() {
   }));
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
@@ -362,7 +363,7 @@ export default function InsightsScreen() {
           </TouchableOpacity>
         </Animated.View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -371,7 +372,7 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   scrollContent: {
     paddingHorizontal: 24,
-    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    paddingTop: Platform.OS === 'ios' ? 50 : 30,
     paddingBottom: 32,
   },
 

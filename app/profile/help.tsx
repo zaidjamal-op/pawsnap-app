@@ -32,27 +32,36 @@ export default function HelpCenterScreen() {
       label: 'Report a bug',
       iconColor: '#EF4444',
       iconBg: 'rgba(239,68,68,0.08)',
-      onPress: () => Linking.openURL('mailto:support@pawsnap.app?subject=Bug%20Report'),
+      onPress: () => router.push('/support/bug'),
     },
     {
       icon: 'lightbulb',
       label: 'Request a feature',
       iconColor: '#F59E0B',
       iconBg: 'rgba(245,158,11,0.08)',
-      onPress: () => Linking.openURL('mailto:support@pawsnap.app?subject=Feature%20Request'),
+      onPress: () => router.push('/support/feature'),
     },
     {
       icon: 'chat-bubble-outline',
       label: 'Contact support',
       iconColor: '#3B82F6',
       iconBg: 'rgba(59,130,246,0.08)',
-      onPress: () => Linking.openURL('mailto:support@pawsnap.app'),
+      onPress: () => router.push('/support/contact'),
     },
-    {
-      icon: 'quiz',
-      label: 'Frequently Asked Questions',
-      iconColor: '#6B7280',
-      iconBg: 'rgba(107,114,128,0.08)',
+  ];
+
+  const FAQS = [
+    { 
+      question: "How do I add a new pet?", 
+      answer: "Go to your Profile, select 'My Pets', and tap the 'Add a new pet' button at the bottom of the screen." 
+    },
+    { 
+      question: "Can I share my pet's data with my vet?", 
+      answer: "Yes! Use the 'Reports' tab to generate a health summary link that you can share directly with your veterinarian." 
+    },
+    { 
+      question: "How do I cancel my subscription?", 
+      answer: "You can manage your subscription settings in the 'Subscription' section of your Profile or through your device's app store settings." 
     },
   ];
 
@@ -100,6 +109,17 @@ export default function HelpCenterScreen() {
             </TouchableOpacity>
           </Animated.View>
         ))}
+
+        {/* ─── FAQ Section ─── */}
+        <Animated.View entering={FadeInDown.delay(400).duration(500)} style={styles.faqSection}>
+          <Text style={styles.sectionTitle}>FREQUENTLY ASKED QUESTIONS</Text>
+          {FAQS.map((faq, i) => (
+            <View key={i} style={styles.faqItem}>
+              <Text style={styles.faqQuestion}>{faq.question}</Text>
+              <Text style={styles.faqAnswer}>{faq.answer}</Text>
+            </View>
+          ))}
+        </Animated.View>
 
 
 
@@ -176,6 +196,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center', alignItems: 'center',
   },
   actionLabel: { fontSize: 15, fontWeight: '600', color: '#E5E7EB' },
+
+  sectionTitle: {
+    fontSize: 11, fontWeight: '800', color: '#6B7280',
+    letterSpacing: 1.5, marginBottom: 12, paddingLeft: 4, marginTop: 24,
+  },
+  faqSection: { marginBottom: 20 },
+  faqItem: {
+    backgroundColor: BrandColors.surface,
+    borderRadius: 14, padding: 16,
+    marginBottom: 10,
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.04)',
+  },
+  faqQuestion: { fontSize: 15, fontWeight: '600', color: '#FFFFFF', marginBottom: 6 },
+  faqAnswer: { fontSize: 13, color: '#9CA3AF', lineHeight: 20 },
 
   /* ─── Footer ─── */
   footer: { alignItems: 'center', paddingTop: 32 },

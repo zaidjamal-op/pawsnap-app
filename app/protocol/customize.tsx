@@ -2,8 +2,9 @@ import { BrandColors } from '@/constants/theme';
 import ScreenHeader from '@/components/ScreenHeader';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import React from 'react';
+import { usePets } from '@/context/PetContext';
 import {
   Platform,
   ScrollView,
@@ -59,6 +60,9 @@ const TASKS: ProtocolTask[] = [
 
 export default function CustomizeProtocolScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const title = params.title as string;
+  const { startProtocol } = usePets();
 
   // Task toggle states
   const [taskStates, setTaskStates] = React.useState<Record<string, boolean>>(() => {
@@ -164,8 +168,8 @@ export default function CustomizeProtocolScreen() {
           style={[styles.ctaBtn, enabledCount === 0 && { opacity: 0.5 }]}
           activeOpacity={0.85}
           disabled={enabledCount === 0}
-          onPress={async () => {
-            await AsyncStorage.setItem('protocol_active', 'true');
+          onPress={() => {
+            startProtocol(title || 'Custom Protocol');
             router.replace('/(tabs)/protocol');
           }}
         >

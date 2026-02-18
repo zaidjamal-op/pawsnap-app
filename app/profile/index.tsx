@@ -15,17 +15,14 @@ import {
 import { AppConfig } from '@/constants/config';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
+import { usePets } from '@/context/PetContext';
+
 // Mock user data
 const USER = {
   name: 'Alex Johnson',
   email: 'alex@example.com',
   isPremium: true,
   avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD7LwViCdQwhgOpZWO7bMdrdGVRiPD4x90yw9v6y7tFMhgInFQ4gsabcUJHlBJf5PfCpWI8kyqtxZjlgV_jc8xriPhXQadmM_iP9Fr-2whPzCBiFz7g-cAMMBzc-11GiX8e_vHLpIwrAA-uPMY6TjPI0FhTKmEqV68OIBo_nFPf10zS_swyXUQ1Itl-pHNOl5_FXVsuhksPfVKf4-NqXPQQZVTh2wEC8mLncEoObp19tm0P8CtYOKGz4cEqH9g6QxnaUeJRYQQP_S6U',
-};
-
-const ACTIVE_PET = {
-  name: 'Luna',
-  avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuApyt8behucmGqsoweFCm0ChByFu9b_6YcJA_DsadohRC4_2ko7xdOSTMjyTt2gWGGG0DxVP5lFxCuVPZ6JtT5ctk_2THfofm8fATnRxSaizmpmt7tD2ySjQbsrGkS_hTuzI1xpvbnTl8l2I6k5tuvR2z71Fa11mWct3bKT8hMBOeDKjkdgDAhavW9eb9hSUs4FR-hhgTgPPaj6_7EzbBC1wHlU54e062LUfbxsW9lyfCVt-PwcvK4QglWULSaNhhMVhcmPk_6a4Voz',
 };
 
 interface AccountRow {
@@ -37,17 +34,20 @@ interface AccountRow {
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const { pets, activePetId } = usePets();
+
+  const activePet = pets.find(p => p.id === activePetId);
 
   const accountItems: AccountRow[] = [
     { icon: 'pets', label: 'My Pets', onPress: () => router.push('/profile/pets') },
     { icon: 'credit-card', label: 'Subscription', onPress: () => router.push('/profile/subscription') },
     { icon: 'notifications', label: 'Notifications', badge: 2, onPress: () => router.push('/profile/notifications') },
     { icon: 'security', label: 'Data & Privacy', onPress: () => router.push('/profile/data-privacy') },
+    { icon: 'help-outline', label: 'Help & Support', onPress: () => router.push('/profile/help') },
   ];
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       {/* Header */}
       <ScreenHeader
         title="Profile"
@@ -91,28 +91,30 @@ export default function ProfileScreen() {
         </Animated.View>
 
         {/* ─── Active Pet Card ─── */}
-        <Animated.View entering={FadeInDown.delay(180).duration(500)}>
-          <TouchableOpacity
-            style={styles.petCard}
-            activeOpacity={0.8}
-            onPress={() => router.push('/profile/pets')}
-          >
-            <View style={styles.petLeft}>
-              <View style={styles.petAvatarWrap}>
-                <Image source={{ uri: ACTIVE_PET.avatar }} style={styles.petAvatar} />
-                <View style={styles.petDot} />
+        {activePet && (
+          <Animated.View entering={FadeInDown.delay(180).duration(500)}>
+            <TouchableOpacity
+              style={styles.petCard}
+              activeOpacity={0.8}
+              onPress={() => router.push('/profile/pets')}
+            >
+              <View style={styles.petLeft}>
+                <View style={styles.petAvatarWrap}>
+                  <Image source={{ uri: activePet.avatar }} style={styles.petAvatar} />
+                  <View style={styles.petDot} />
+                </View>
+                <View>
+                  <Text style={styles.petLabel}>CURRENTLY TRACKING</Text>
+                  <Text style={styles.petName}>{activePet.name}</Text>
+                </View>
               </View>
-              <View>
-                <Text style={styles.petLabel}>CURRENTLY TRACKING</Text>
-                <Text style={styles.petName}>{ACTIVE_PET.name}</Text>
-              </View>
-            </View>
-            <TouchableOpacity style={styles.switchBtn} activeOpacity={0.7}>
-              <Text style={styles.switchText}>Switch</Text>
-              <MaterialIcons name="swap-horiz" size={18} color={BrandColors.primary} />
+              <TouchableOpacity style={styles.switchBtn} activeOpacity={0.7} onPress={() => router.push('/profile/pets')}>
+                <Text style={styles.switchText}>Switch</Text>
+                <MaterialIcons name="swap-horiz" size={18} color={BrandColors.primary} />
+              </TouchableOpacity>
             </TouchableOpacity>
-          </TouchableOpacity>
-        </Animated.View>
+          </Animated.View>
+        )}
 
         {/* ─── Account Section ─── */}
         <Animated.View entering={FadeInDown.delay(300).duration(500)}>

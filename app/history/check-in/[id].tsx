@@ -4,92 +4,249 @@ import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
 import {
-    Image,
     Platform,
     ScrollView,
     StyleSheet,
     Text,
+
     TouchableOpacity,
     View,
 } from 'react-native';
+import { Image as ExpoImage } from 'expo-image';
+import { Video, ResizeMode } from 'expo-av';
+import Svg, { Circle, G } from 'react-native-svg';
+import Animated, { 
+  useSharedValue, 
+  useAnimatedProps, 
+  withTiming, 
+  withDelay,
+  useDerivedValue,
+  interpolateColor
+} from 'react-native-reanimated';
+import { usePets } from '@/context/PetContext';
+
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+
+function SeverityRing({ score }: { score: number }) {
+  const radius = 50;
+  const strokeWidth = 10;
+  const circumference = 2 * Math.PI * radius;
+  const progress = useSharedValue(0);
+
+  React.useEffect(() => {
+    progress.value = withDelay(300, withTiming(score / 10, { duration: 1500 }));
+  }, [score]);
+
+  const animatedProps = useAnimatedProps(() => {
+    const strokeDashoffset = circumference * (1 - progress.value);
+    const stroke = interpolateColor(
+      progress.value,
+      [0, 0.4, 0.7, 1],
+      ['#22C55E', '#FBBF24', '#F97316', '#EF4444']
+    );
+    return {
+      strokeDashoffset,
+      stroke,
+    };
+  });
+  
+  // const colorStyle = useDerivedValue(() => {
+  //     return interpolateColor(
+  //       progress.value,
+  //       [0, 0.4, 0.7, 1],
+  //       ['#22C55E', '#FBBF24', '#F97316', '#EF4444']
+  //     );
+  // });
+
+  // Animated props for color need to be handled carefully with SVG
+  // Reanimated 2/3 supports animating props directly if createAnimatedComponent is used
+  // But strictly speaking interpolateColor returns color string. 
+  // We can pass it if we useAnimatedProps returning matches expected prop type.
+  
+  // const animatedColorProps = useAnimatedProps(() => {
+  //     return {
+  //         stroke: colorStyle.value
+  //     };
+  // });
+
+  return (
+    <View style={styles.ringContainer}>
+      <Svg width={140} height={140} viewBox="0 0 140 140">
+        <G rotation="-90" origin="70, 70">
+          {/* Background Track */}
+          <Circle
+            cx="70"
+            cy="70"
+            r={radius}
+            stroke="rgba(255,255,255,0.08)"
+            strokeWidth={strokeWidth}
+            fill="transparent"
+          />
+          {/* Progress Circle */}
+          <AnimatedCircle
+            cx="70"
+            cy="70"
+            r={radius}
+            strokeWidth={strokeWidth}
+            fill="transparent"
+            strokeDasharray={circumference}
+            animatedProps={animatedProps}
+            strokeLinecap="round"
+          />
+        </G>
+      </Svg>
+      <View style={styles.ringContent}>
+         <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
+           <Animated.Text style={[styles.severityScore, {color: '#FFF'}]}>{score}</Animated.Text>
+           <Text style={styles.severityMax}>/10</Text>
+         </View>
+         <Text style={[styles.severityLabel, { color: score >= 8 ? '#EF4444' : score >= 5 ? '#FBBF24' : '#22C55E' }]}>
+           {score >= 8 ? 'SEVERE' : score >= 5 ? 'MODERATE' : 'MILD'}
+         </Text>
+      </View>
+    </View>
+  );
+}
 
 export default function CheckInDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
+  const { checkIns, media, deleteCheckIn } = usePets();
+
+  const checkIn = checkIns.find(c => c.id === id);
+  const linkedMediaFromContext = media.filter(m => m.checkInId === id);
+
+  if (!checkIn) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text style={{ color: '#9CA3AF' }}>Check-in not found</Text>
+        <TouchableOpacity onPress={() => router.back()} style={{ marginTop: 16 }}>
+          <Text style={{ color: BrandColors.primary }}>Go Back</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  const fallbackLinkedMedia = [
+    checkIn.imageUri
+      ? {
+          id: `${checkIn.id}-photo`,
+          petId: checkIn.petId,
+          date: checkIn.date,
+          type: 'photo' as const,
+          uri: checkIn.imageUri,
+          area: checkIn.selectedParts?.[0] ?? 'General',
+          notes: checkIn.notes,
+          checkInId: checkIn.id,
+        }
+      : null,
+    checkIn.videoUri
+      ? {
+          id: `${checkIn.id}-video`,
+          petId: checkIn.petId,
+          date: checkIn.date,
+          type: 'video' as const,
+          uri: checkIn.videoUri,
+          area: checkIn.selectedParts?.[0] ?? 'General',
+          notes: checkIn.notes,
+          checkInId: checkIn.id,
+        }
+      : null,
+  ].filter(Boolean);
+
+  const linkedMedia = [...linkedMediaFromContext, ...fallbackLinkedMedia].filter(
+    (item, index, arr) =>
+      arr.findIndex(
+        (m) => m?.uri === item?.uri && m?.type === item?.type && m?.checkInId === item?.checkInId,
+      ) === index,
+  );
+  const hasLinkedVideo = linkedMedia.some((m) => m?.type === 'video');
+  const linkedTitle = hasLinkedVideo ? 'Linked Photos and Videos' : 'Linked Photos';
+
+  const date = new Date(checkIn.date);
+  const dateStr = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+
+  const handleDelete = () => {
+    deleteCheckIn(id as string);
+    router.back();
+  };
 
   return (
     <View style={styles.container}>
       {/* ─── Header ─── */}
       <ScreenHeader
         title="Check-in Details"
-        rightElement={
-            <TouchableOpacity onPress={() => { /* Handle menu */ }}>
-                <Ionicons name="ellipsis-vertical" size={24} color="#FFFFFF" />
-            </TouchableOpacity>
-        }
       />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.dateBanner}>
-           <Text style={styles.dateText}>October 24, 2023 at 9:41 AM</Text>
+           <Text style={styles.dateText}>{dateStr} at {timeStr}</Text>
         </View>
 
-        {/* Main Card */}
+
         <View style={styles.card}>
           {/* Severity Score */}
           <View style={styles.severitySection}>
-             <View style={styles.severityRingOuter}>
-                <View style={styles.severityRingInner} />
-                <View style={styles.severityRingHighlight} />
-                <View style={styles.severityScoreBox}>
-                   <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
-                     <Text style={styles.severityScore}>8</Text>
-                     <Text style={styles.severityMax}>/10</Text>
-                   </View>
-                   <Text style={styles.severityLabel}>SEVERE</Text>
-                </View>
-             </View>
+             <SeverityRing score={checkIn.itchLevel} />
           </View>
+
 
           {/* Details */}
-          <View style={styles.detailRow}>
-             <View style={styles.detailTitleRow}>
-               <Ionicons name="paw" size={18} color={BrandColors.primary} />
-               <Text style={styles.detailTitle}>Most Itchy</Text>
-             </View>
-             <View style={styles.tagsRow}>
-               <View style={styles.pill}><Text style={styles.pillText}>Paws</Text></View>
-               <View style={styles.pill}><Text style={styles.pillText}>Belly</Text></View>
-             </View>
-          </View>
+          {checkIn.selectedParts && checkIn.selectedParts.length > 0 && (
+            <>
+              <View style={styles.detailRow}>
+                 <View style={styles.detailTitleRow}>
+                   <Ionicons name="paw" size={18} color={BrandColors.primary} />
+                   <Text style={styles.detailTitle}>Most Itchy</Text>
+                 </View>
+                 <View style={styles.tagsRow}>
+                   {checkIn.selectedParts.map((part, index) => (
+                      <View key={index} style={styles.pill}><Text style={styles.pillText}>{part}</Text></View>
+                   ))}
+                 </View>
+              </View>
+              <View style={styles.divider} />
+            </>
+          )}
 
-          <View style={styles.divider} />
+          {checkIn.skinSigns && checkIn.skinSigns.length > 0 && (
+            <>
+              <View style={styles.detailRow}>
+                 <View style={styles.detailTitleRow}>
+                   <MaterialIcons name="healing" size={18} color="#EF4444" />
+                   <Text style={styles.detailTitle}>Skin Signs</Text>
+                 </View>
+                 <View style={styles.tagsRow}>
+                   {checkIn.skinSigns.map((sign, index) => (
+                      <View key={index} style={[styles.pill, styles.pillRed]}>
+                        <Text style={[styles.pillText, styles.pillTextRed]}>{sign}</Text>
+                      </View>
+                   ))}
+                 </View>
+              </View>
+              <View style={styles.divider} />
+            </>
+          )}
 
-          <View style={styles.detailRow}>
-             <View style={styles.detailTitleRow}>
-               <MaterialIcons name="healing" size={18} color="#EF4444" />
-               <Text style={styles.detailTitle}>Skin Signs</Text>
-             </View>
-             <View style={styles.tagsRow}>
-               <View style={[styles.pill, styles.pillRed]}><Text style={[styles.pillText, styles.pillTextRed]}>Redness</Text></View>
-               <View style={[styles.pill, styles.pillRed]}><Text style={[styles.pillText, styles.pillTextRed]}>Hot Spot</Text></View>
-             </View>
-          </View>
-
-          <View style={styles.divider} />
-
-          <View style={styles.detailRow}>
-             <View style={styles.detailTitleRow}>
-               <Ionicons name="leaf" size={18} color="#22C55E" />
-               <Text style={styles.detailTitle}>Exposures</Text>
-             </View>
-             <View style={styles.tagsRow}>
-               <View style={[styles.pill, styles.pillGreen]}><Text style={[styles.pillText, styles.pillTextGreen]}>Grass</Text></View>
-               <View style={[styles.pill, styles.pillBlue]}><Text style={[styles.pillText, styles.pillTextBlue]}>New Shampoo</Text></View>
-             </View>
-          </View>
-
-          <View style={styles.divider} />
+          {checkIn.exposures && checkIn.exposures.length > 0 && (
+            <>
+              <View style={styles.detailRow}>
+                 <View style={styles.detailTitleRow}>
+                   <Ionicons name="leaf" size={18} color="#22C55E" />
+                   <Text style={styles.detailTitle}>Exposures</Text>
+                 </View>
+                 <View style={styles.tagsRow}>
+                    {checkIn.exposures.map((exp, index) => (
+                      <View key={index} style={[styles.pill, styles.pillGreen]}>
+                        <Text style={[styles.pillText, styles.pillTextGreen]}>{exp}</Text>
+                      </View>
+                   ))}
+                 </View>
+              </View>
+              <View style={styles.divider} />
+            </>
+          )}
 
           <View style={styles.detailRow}>
              <View style={styles.detailTitleRow}>
@@ -98,39 +255,70 @@ export default function CheckInDetailScreen() {
              </View>
              <View style={styles.noteBox}>
                <Text style={styles.noteText}>
-                 Bella seemed very agitated after running in the tall grass at the park. She immediately started chewing her paws when we got home. Gave her a soothing bath.
+                 {checkIn.notes || 'No notes added.'}
                </Text>
              </View>
           </View>
         </View>
 
-        {/* Linked Photos */}
-        <View style={styles.photosSection}>
-           <View style={styles.photosHeader}>
-             <Text style={styles.photosTitle}>Linked Photos</Text>
-             <Text style={styles.photosCount}>2 photos</Text>
-           </View>
-           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.photosRow}>
-              <View style={styles.photoThumb}>
-                 <Image source={{ uri: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=300' }} style={styles.photoImg} />
-              </View>
-              <View style={styles.photoThumb}>
-                 <Image source={{ uri: 'https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&q=80&w=300' }} style={styles.photoImg} />
-              </View>
-              <TouchableOpacity style={styles.addPhotoThumb}>
-                 <Ionicons name="camera" size={24} color={BrandColors.primary} />
-                 <Text style={styles.addPhotoLabel}>Add Photo</Text>
-              </TouchableOpacity>
-           </ScrollView>
-        </View>
+        {/* Linked Media */}
+        {linkedMedia.length > 0 && (
+          <View style={styles.photosSection}>
+             <View style={styles.photosHeader}>
+               <Text style={styles.photosTitle}>{linkedTitle}</Text>
+               <Text style={styles.photosCount}>{linkedMedia.length} items</Text>
+             </View>
+             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.photosRow}>
+                {linkedMedia.map(item => (
+                  <TouchableOpacity
+                    key={`${item.id}-${item.uri}`}
+                    style={styles.photoThumb}
+                    onPress={() =>
+                      router.push({
+                        pathname: '/history/photo/[id]',
+                        params: {
+                          id: item.id,
+                          uri: item.uri,
+                          type: item.type,
+                          date: item.date,
+                          area: item.area ?? '',
+                          notes: item.notes ?? '',
+                        },
+                      })
+                    }
+                    activeOpacity={0.85}
+                  >
+                     {item.type === 'video' ? (
+                       <Video
+                         source={{ uri: item.uri }}
+                         style={styles.photoImg}
+                         resizeMode={ResizeMode.COVER}
+                         shouldPlay
+                         isMuted
+                         isLooping
+                         useNativeControls={false}
+                       />
+                     ) : (
+                       <ExpoImage source={{ uri: item.uri }} style={styles.photoImg} contentFit="cover" />
+                     )}
+                     {item.type === 'video' && (
+                        <View style={{position: 'absolute', inset: 0, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.3)'}}>
+                           <Ionicons name="play-circle" size={24} color="#FFF" />
+                        </View>
+                     )}
+                  </TouchableOpacity>
+                ))}
+             </ScrollView>
+          </View>
+        )}
 
         {/* Actions */}
         <View style={styles.actions}>
-           <TouchableOpacity style={styles.editBtn}>
+           <TouchableOpacity style={styles.editBtn} onPress={() => router.push({ pathname: '/checkin/daily', params: { id: checkIn.id } })}>
               <Ionicons name="create-outline" size={20} color={BrandColors.primary} />
               <Text style={styles.editBtnText}>Edit Check-in</Text>
            </TouchableOpacity>
-           <TouchableOpacity style={styles.deleteBtn}>
+           <TouchableOpacity style={styles.deleteBtn} onPress={handleDelete}>
               <Ionicons name="trash-outline" size={20} color="#9CA3AF" />
               <Text style={styles.deleteBtnText}>Delete</Text>
            </TouchableOpacity>
@@ -156,7 +344,7 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 20, fontWeight: '700', color: '#FFFFFF' },
   scrollContent: { paddingHorizontal: 24, paddingBottom: 40 },
   dateBanner: { alignItems: 'center', marginBottom: 24 },
-  dateText: { color: '#9CA3AF', fontSize: 14, fontWeight: '500' },
+  dateText: { color: '#9CA3AF', fontSize: 14, fontWeight: '500', marginTop: 30 },
   
   card: {
     backgroundColor: BrandColors.surface,
@@ -182,7 +370,7 @@ const styles = StyleSheet.create({
   severityScoreBox: { alignItems: 'center' },
   severityScore: { fontSize: 40, fontWeight: '800', color: '#FFFFFF' },
   severityMax: { fontSize: 20, fontWeight: '700', color: '#9CA3AF' },
-  severityLabel: { marginTop: 4, color: BrandColors.primary, fontSize: 12, fontWeight: '700', letterSpacing: 1 },
+  severityLabel: { marginTop: 4, color: BrandColors.primary, fontSize: 7, fontWeight: '700', letterSpacing: 1 },
 
   detailRow: { marginVertical: 8 },
   detailTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 },
@@ -230,4 +418,17 @@ const styles = StyleSheet.create({
     padding: 16, borderRadius: 12,
   },
   deleteBtnText: { color: '#9CA3AF', fontWeight: '600', fontSize: 16 },
+  
+  ringContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 140,
+    height: 140,
+    marginBottom: 16,
+  },
+  ringContent: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });

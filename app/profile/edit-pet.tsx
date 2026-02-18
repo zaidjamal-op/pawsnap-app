@@ -1,9 +1,10 @@
 import { BrandColors } from '@/constants/theme';
 import ScreenHeader from '@/components/ScreenHeader';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
 import {
+  Alert,
   Image,
   Platform,
   ScrollView,
@@ -15,26 +16,85 @@ import {
   View,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-
-// Mock data
-const PET_AVATAR = 'https://lh3.googleusercontent.com/aida-public/AB6AXuBmq82oNYpg7bI14uEhifEN_e6w1edgfURf-A6U1yy_rC7IGiFjgybpdCrPjICi-ZkywnliL-jqPxO36fYyTXFNmPvloFJp9ZPyG9grS1Ki01YB5i5YzQjTmv3ZsDKY_WHq15PaIBPf85A8xsYt6_voBYiHE4jRaVr2bpgJ5TMFqanDqKgB2BSt5NuRfAVYF-NGdhX7h1ina5PlekOiKLe15Qr29M5VILRzM7bjVGO2pPEG8wSrjKtdE3-CwWfY0OOcAe7cCILCbCnE';
+import { usePets } from '@/context/PetContext';
 
 export default function EditPetScreen() {
   const router = useRouter();
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const { getPet, updatePet, deletePet } = usePets();
+
+  const pet = getPet(id);
 
   // Form state
-  const [name, setName] = useState('Luna');
+  const [name, setName] = useState('');
   const [species, setSpecies] = useState<'Dog' | 'Cat'>('Dog');
-  const [age, setAge] = useState('4 yrs');
-  const [breed, setBreed] = useState('Golden Retriever');
-  const [environment, setEnvironment] = useState<'Indoor' | 'Outdoor'>('Indoor');
-  const [fleaPrevention, setFleaPrevention] = useState(true);
+  const [age, setAge] = useState('');
+  const [breed, setBreed] = useState('');
+  const [environment, setEnvironment] = useState<'Indoor' | 'Outdoor' | 'Both'>('Indoor');
+  const [fleaPrevention, setFleaPrevention] = useState(false);
   const [hypoDiet, setHypoDiet] = useState(false);
+
+  useEffect(() => {
+    if (pet) {
+      setName(pet.name);
+      setSpecies(pet.species);
+      setAge(pet.age);
+      setBreed(pet.breed);
+      setEnvironment(pet.environment);
+      setFleaPrevention(pet.fleaPrevention || false);
+      setHypoDiet(pet.hypoDiet || false);
+    }
+  }, [pet]);
+
+  if (!pet) {
+    return (
+      <View style={styles.container}>
+        <ScreenHeader title="Pet Not Found" />
+        <View style={styles.center}>
+          <Text style={styles.errorText}>Pet not found</Text>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Text style={styles.linkText}>Go back</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
+  const handleSave = () => {
+    updatePet(id, {
+      name,
+      species,
+      age,
+      breed,
+      environment,
+      fleaPrevention,
+      hypoDiet,
+    });
+    router.back();
+  };
+
+  const handleDelete = () => {
+    Alert.alert(
+      'Delete Pet',
+      `Are you sure you want to delete ${name}? This action cannot be undone.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Delete', 
+          style: 'destructive',
+          onPress: () => {
+            deletePet(id);
+            router.back();
+          }
+        }
+      ]
+    );
+  };
 
   return (
     <View style={styles.container}>
       {/* Header */}
-      <ScreenHeader title={`Edit ${name}`} />
+      <ScreenHeader title={`Edit ${pet.name}`} />
 
       <ScrollView
         style={styles.scroll}
@@ -44,7 +104,7 @@ export default function EditPetScreen() {
         {/* ─── Avatar Section ─── */}
         <Animated.View entering={FadeInDown.delay(60).duration(400)} style={styles.avatarSection}>
           <View style={styles.avatarOuter}>
-            <Image source={{ uri: PET_AVATAR }} style={styles.avatar} />
+            <Image source={{ uri: pet.avatar }} style={styles.avatar} />
             <TouchableOpacity style={styles.editPhotoBadge} activeOpacity={0.8}>
               <MaterialIcons name="edit" size={12} color={BrandColors.background} />
             </TouchableOpacity>
@@ -108,7 +168,7 @@ export default function EditPetScreen() {
           <View style={styles.fieldGroup}>
             <Text style={styles.fieldLabel}>Environment</Text>
             <View style={styles.segmentOuter}>
-              {(['Indoor', 'Outdoor'] as const).map((opt) => (
+              {(['Indoor', 'Both', 'Outdoor'] as const).map((opt) => (
                 <TouchableOpacity
                   key={opt}
                   style={[
@@ -174,11 +234,11 @@ export default function EditPetScreen() {
 
         {/* ─── Actions ─── */}
         <Animated.View entering={FadeInDown.delay(420).duration(400)} style={styles.actions}>
-          <TouchableOpacity style={styles.saveBtn} activeOpacity={0.85} onPress={() => router.back()}>
+          <TouchableOpacity style={styles.saveBtn} activeOpacity={0.85} onPress={handleSave}>
             <Text style={styles.saveBtnText}>Save Changes</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.deleteBtn} activeOpacity={0.7}>
+          <TouchableOpacity style={styles.deleteBtn} activeOpacity={0.7} onPress={handleDelete}>
             <MaterialIcons name="delete-outline" size={18} color="#6B7280" />
             <Text style={styles.deleteBtnText}>Delete Pet Profile</Text>
           </TouchableOpacity>
@@ -192,6 +252,9 @@ export default function EditPetScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: BrandColors.background },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  errorText: { color: '#FFFFFF', fontSize: 16, marginBottom: 8 },
+  linkText: { color: BrandColors.primary, fontSize: 16 },
 
   /* Header */
   header: {
